@@ -488,6 +488,7 @@ partial class Main
         lvRESULT.TabIndex = 0;
         lvRESULT.UseCompatibleStateImageBehavior = false;
         lvRESULT.View = View.Details;
+        lvRESULT.ItemSelectionChanged += lvRESULT_ItemSelectionChanged;
         lvRESULT.KeyDown += lvRESULT_KeyDown;
         // 
         // _menuMain
