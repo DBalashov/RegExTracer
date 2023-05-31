@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RegExpTracerAvalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+        mc:Ignorable="d" Width="1600" Height="900"
+        WindowStartupLocation="CenterScreen"
+        x:Class="RegExpTracerAvalonia.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="RegExpTracer.Avalonia"
+        Activated="WindowBase_OnActivated">
+
+    <Grid ShowGridLines="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="300" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Column="0" Grid.Row="0"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock HorizontalAlignment="Stretch"
+                       TextAlignment="Left"
+                       Padding="2" Margin="2"
+                       Background="#dbdbdb"
+                       Text="Regular expression" />
+            <avaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch"
+                                     WordWrap="{Binding WordWrap}"
+                                     Name="edPattern"
+                                     Text=""
+                                     TextChanged="edPattern_OnTextChanged"
+                                     FontFamily="Jetbrains Mono" />
+
+            <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <CheckBox IsChecked="{Binding WordWrap}">Word wrap</CheckBox>
+                        <CheckBox IsChecked="{Binding PatternExplicit}">Explicit</CheckBox>
+                        <CheckBox IsChecked="{Binding PatternMultiline}">Multiline</CheckBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <CheckBox IsChecked="{Binding PatternIgnoreCase}">Ignore case</CheckBox>
+                        <CheckBox IsChecked="{Binding PatternSingleLine}">Single line</CheckBox>
+                        <CheckBox IsChecked="{Binding PatternLineBreaks}">Line breaks</CheckBox>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="1"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock HorizontalAlignment="Stretch"
+                       TextAlignment="Left"
+                       Padding="2" Margin="2"
+                       Background="#dbdbdb"
+                       Text="Input" />
+            <avaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
+                                     Name="edInput"
+                                     TextChanged="edInput_OnTextChanged"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch"
+                                     FontFamily="Jetbrains Mono" />
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="2"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Margin="10,0,10,0"
+                  Name="gridDataHeader" />
+
+            <TextBlock Grid.Row="1"
+                       IsVisible="{Binding ErrorVisible}"
+                       HorizontalAlignment="Stretch"
+                       Foreground="Red"
+                       Text="{Binding Error}" />
+            <ListBox Grid.Row="1"
+                     IsVisible="{Binding DataVisible}"
+                     HorizontalAlignment="Stretch"
+                     SelectionMode="Multiple"
+                     VerticalAlignment="Stretch"
+                     ItemTemplate="{Binding DataTemplate}"
+                     Items="{Binding Data}"
+                     SelectionChanged="lbDATA_OnSelectionChanged"
+                     Name="lbDATA"
+                     KeyDown="lbDATA_OnKeyDown" />
+        </Grid>
+    </Grid>
+</Window>

@@ -38,7 +38,7 @@ public partial class Main : Form
         _documentIsUnsaved = false;
     }
 
-    void ApplyHighlightInput(Range[][][] matchList, string textInput, string[] textInputLineList)
+    void applyHighlightInput(Range[][][] matchList, string textInput, string[] textInputLineList)
     {
         clearHighlightInput();
         var inputArray = new HighlightingInput[4];
@@ -161,7 +161,7 @@ public partial class Main : Form
         textDocument.Unfreeze();
     }
 
-    void ApplyHighlightRegEx()
+    void applyHighlightRegEx()
     {
         clearHighlightRegEx();
         var exArray = new HighlightingRegEx[3];
@@ -322,7 +322,7 @@ public partial class Main : Form
         textDocument.Unfreeze();
     }
 
-    void ApplyHighlightResult(Range[][][] matchList, string textInput)
+    void applyHighlightResult(Range[][][] matchList, string textInput)
     {
         clearHighlightResult(null);
         txRESULT.ReadOnly = false;
@@ -456,16 +456,16 @@ public partial class Main : Form
         return errorMessage == null;
     }
 
-    void BuildResult(BuildReason buildReason)
+    void buildResult(BuildReason buildReason)
     {
         var lines     = txDATA.Lines;
         var textInput = string.Join(!coLINE_BREAKS.Checked ? "\n" : "\r\n", lines);
 
         if (buildMatchList(txREGEX.Text.Replace("\r", "").Replace("\n", ""), textInput, out var rangeArray, out var errMessage))
         {
-            if (buildReason is BuildReason.Document or BuildReason.RegEx) ApplyHighlightRegEx();
-            if (buildReason is BuildReason.Document or BuildReason.Input) ApplyHighlightInput(rangeArray, textInput, lines);
-            ApplyHighlightResult(rangeArray, textInput);
+            if (buildReason is BuildReason.Document or BuildReason.RegEx) applyHighlightRegEx();
+            if (buildReason is BuildReason.Document or BuildReason.Input) applyHighlightInput(rangeArray, textInput, lines);
+            applyHighlightResult(rangeArray, textInput);
         }
         else
         {
@@ -481,7 +481,7 @@ public partial class Main : Form
         if (!_isHighlighting)
         {
             _isHighlighting = true;
-            BuildResult(BuildReason.Document);
+            buildResult(BuildReason.Document);
             _isHighlighting = false;
         }
 
@@ -684,7 +684,7 @@ public partial class Main : Form
 
         _isHighlighting = true;
         documentOpen(null);
-        BuildResult(BuildReason.Document);
+        buildResult(BuildReason.Document);
         _isHighlighting    = false;
         _documentIsUnsaved = false;
     }
@@ -716,7 +716,7 @@ public partial class Main : Form
         txRESULT.Font      = new Font(txRESULT.Font.FontFamily, _settings.TextSize);
 
         _isHighlighting = true;
-        BuildResult(BuildReason.Document);
+        buildResult(BuildReason.Document);
         _isHighlighting = false;
     }
 
@@ -747,7 +747,7 @@ public partial class Main : Form
         if (!_isHighlighting)
         {
             _isHighlighting = true;
-            BuildResult(BuildReason.Input);
+            buildResult(BuildReason.Input);
             _isHighlighting = false;
         }
 
@@ -765,7 +765,7 @@ public partial class Main : Form
         if (!_isHighlighting)
         {
             _isHighlighting = true;
-            BuildResult(BuildReason.Document);
+            buildResult(BuildReason.Document);
             _isHighlighting = false;
         }
 
@@ -799,17 +799,18 @@ public partial class Main : Form
 
     void lvRESULT_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.A && e.Control)
+        if (e is {KeyCode: Keys.A, Control: true})
         {
             lvRESULT.SelectedItems.Clear();
-            for (var i = 0; i < lvRESULT.Items.Count; i++) lvRESULT.SelectedIndices.Add(i);
+            for (var i = 0; i < lvRESULT.Items.Count; i++)
+                lvRESULT.SelectedIndices.Add(i);
         }
-        else if ((e.KeyCode == Keys.Insert || e.KeyCode == Keys.C) && e.Control)
+        else if (e.KeyCode is Keys.Insert or Keys.C && e.Control)
         {
             var sb = new StringBuilder();
             foreach (var row in lvRESULT.Items.Cast<ListViewItem>())
                 sb.AppendLine(row.SubItems.Cast<ListViewItem.ListViewSubItem>().Select(p => p.Text).Aggregate((acc, sel) => acc + "\t" + sel));
-            if (sb.Length > 0) Clipboard.Clear();
+            if (sb.Length == 0) Clipboard.Clear();
             else Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
         }
     }
