@@ -22,7 +22,10 @@ public partial class MainWindow : Window
     void WindowBase_OnActivated(object? sender, EventArgs e)
     {
         edInput.TextArea.TextView.LineTransformers.Clear();
-        edInput.TextArea.TextView.LineTransformers.Add(new LineColorTransformer(edPattern.Text, edInput.Text));
+        edInput.TextArea.TextView.LineTransformers.Add(new DataLineColorTransformer(edPattern.Text, edInput.Text));
+        
+        edPattern.TextArea.TextView.LineTransformers.Clear();
+        edPattern.TextArea.TextView.LineTransformers.Add(new PatternLineColorTransformer(edPattern.Text));
 
         var settings = Settings.Load();
         edInput.Text   = settings.Input;
@@ -41,7 +44,7 @@ public partial class MainWindow : Window
 
     void edPattern_OnTextChanged(object? sender, EventArgs e)
     {
-        var lct = edInput.TextArea.TextView.LineTransformers.OfType<LineColorTransformer>().First();
+        var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         if (DataContext is MainWindowViewModel vm)
         {
             if (!lct.TryUpdatePattern(edPattern.Text, out var ex))
@@ -79,13 +82,17 @@ public partial class MainWindow : Window
                                                                         });
             }
         }
-
+        
         edInput.TextArea.TextView.Redraw();
+        
+        var pct = edPattern.TextArea.TextView.LineTransformers.OfType<PatternLineColorTransformer>().First();
+        pct.UpdatePattern(edPattern.Text);
+        edPattern.TextArea.TextView.Redraw();
     }
 
     void edInput_OnTextChanged(object? sender, EventArgs e)
     {
-        var lct = edInput.TextArea.TextView.LineTransformers.OfType<LineColorTransformer>().First();
+        var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         if (DataContext is MainWindowViewModel vm)
         {
             vm.Data = !lct.UpdateSource(edInput.Text) ? Array.Empty<SourceMatchData>() : lct.GetMatches();
@@ -141,7 +148,7 @@ public partial class MainWindow : Window
     void lbDATA_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         var m   = lbDATA.SelectedItems.OfType<SourceMatchData>().ToArray();
-        var lct = edInput.TextArea.TextView.LineTransformers.OfType<LineColorTransformer>().First();
+        var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         lct.UpdateSelected(m);
         edInput.TextArea.TextView.Redraw();
     }

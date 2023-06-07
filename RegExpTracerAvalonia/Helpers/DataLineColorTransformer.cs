@@ -8,7 +8,7 @@ using AvaloniaEdit.Rendering;
 
 namespace RegExpTracerAvalonia.Helpers;
 
-class LineColorTransformer : DocumentColorizingTransformer
+class DataLineColorTransformer : DocumentColorizingTransformer
 {
     Match[]           matches;
     Regex             rx;
@@ -16,7 +16,7 @@ class LineColorTransformer : DocumentColorizingTransformer
 
     readonly SourceHelper sourceHelper;
 
-    public LineColorTransformer(string pattern, string input)
+    public DataLineColorTransformer(string pattern, string input)
     {
         rx           = new Regex(pattern);
         sourceHelper = new SourceHelper(input);
@@ -27,15 +27,21 @@ class LineColorTransformer : DocumentColorizingTransformer
     {
         var r = sourceHelper.GetMatchesInLine(matches, line.LineNumber - 1);
         foreach (var item in r)
-            ChangeLinePart(line.Offset + item.Offset,
-                           Math.Min(line.Offset + item.Offset + item.Length, line.EndOffset),
-                           visualLine =>
-                           {
-                               if (IsSelected(item))
-                                   visualLine.TextRunProperties.Typeface = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Italic, FontWeight.Bold);
+            try
+            {
+                ChangeLinePart(line.Offset + item.Offset,
+                               Math.Min(line.Offset + item.Offset + item.Length, line.EndOffset),
+                               visualLine =>
+                               {
+                                   if (IsSelected(item))
+                                       visualLine.TextRunProperties.Typeface = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Italic, FontWeight.Bold);
 
-                               visualLine.TextRunProperties.BackgroundBrush = UsedColors.Brushes[item.InMatchIndex % UsedColors.Brushes.Length];
-                           });
+                                   visualLine.TextRunProperties.BackgroundBrush = UsedColors.Brushes[item.InMatchIndex % UsedColors.Brushes.Length];
+                               });
+            }
+            catch
+            {
+            }
     }
 
     bool IsSelected(SourceMatchItem m) =>
