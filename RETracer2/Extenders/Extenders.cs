@@ -18,7 +18,7 @@ static class Extenders
         Color.DarkGoldenrod
     };
 
-    public static int toRTFColor(this Color color) => ((color.B << 0x10) | (color.G << 8)) | color.R;
+    public static int toRTFColor(this Color color) => (color.B << 0x10) | (color.G << 8) | color.R;
 
     public static void ClearHighlight(this RichTextBoxEx txREGEX)
     {
@@ -40,36 +40,33 @@ static class Extenders
         doc.Freeze();
 
         foreach (var group in groups)
-        {
-            var range = doc.Range(group.StartOffset, group.EndOffset + 1);
-            var font  = range.Font;
-            font.ForeColor = Colors[group.Index % Colors.Length].toRTFColor();
-            font.Bold      = selectedGroupIndex == group.Index ? FormatFlags.True : FormatFlags.False;
-            font.Underline = selectedGroupIndex == group.Index ? UnderlineFlags.Dotted : UnderlineFlags.None;
-        }
+            doc.Range(group.StartOffset, group.EndOffset + 1)
+               .Font.updateStyle(group.Index, selectedGroupIndex == group.Index, selectedGroupIndex == group.Index, UnderlineFlags.Dotted);
 
         doc.Unfreeze();
     }
 
-    public static void UpdateHLInput(this RichTextBoxEx txINPUT, SourceMatchData[] matchGroups, int selectedGroupIndex, int selectedMatchIndex)
+    public static void UpdateHLInput(this RichTextBoxEx txINPUT, SourceMatchData[] matchGroups, int selectedGroupIndex, HashSet<int> selectedMatchIndexes)
     {
         txINPUT.ClearHighlight();
         var doc = txINPUT.TextDocument!;
         doc.Freeze();
 
         foreach (var group in matchGroups)
-        {
-            foreach (var item in group.Values)
-            {
-                var range = doc.Range(item.Offset, item.Offset + item.Length);
-                var font  = range.Font;
-                font.ForeColor = Colors[item.InMatchIndex % Colors.Length].toRTFColor();
-                font.Bold      = selectedGroupIndex == item.InMatchIndex ? FormatFlags.True : FormatFlags.False;
-                font.Underline = group.MatchIndex   == selectedMatchIndex ? UnderlineFlags.Double : UnderlineFlags.None;
-            }
-        }
+        foreach (var item in group.Values)
+            doc.Range(item.Offset, item.Offset + item.Length)
+               .Font
+               .updateStyle(item.InMatchIndex, selectedGroupIndex == item.InMatchIndex, selectedMatchIndexes.Contains(group.MatchIndex), UnderlineFlags.Double);
 
         doc.Unfreeze();
+    }
+
+    static void updateStyle(this ITextFont font, int colorIndex, bool bold, bool underline, UnderlineFlags flags)
+    {
+        font.ForeColor = Colors[colorIndex % Colors.Length].toRTFColor();
+        font.Shadow    = FormatFlags.True;
+        font.Bold      = bold ? FormatFlags.True : FormatFlags.False;
+        font.Underline = underline ? flags : UnderlineFlags.None;
     }
 
     #region UpdateResult
@@ -91,13 +88,8 @@ static class Extenders
         foreach (var matchGroup in matchGroups)
         {
             var lvi = new ListViewItem(row.ToString());
-
             foreach (var item in matchGroup.Values)
-            {
-                var si = lvi.SubItems.Add(item.Value);
-                si.ForeColor = Colors[item.InMatchIndex % Colors.Length];
-            }
-
+                lvi.SubItems.Add(item.Value);
             lv.Items.Add(lvi);
             row++;
         }

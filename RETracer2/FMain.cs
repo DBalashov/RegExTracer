@@ -8,29 +8,29 @@ namespace RETracer2;
 public partial class FMain : Form
 {
     readonly SourceHelper _sourceHelper = new("");
-    readonly Settings _settings = Settings.Load();
+    readonly Settings     _settings     = Settings.Load();
 
-    bool inUpdating;
-    SourceMatchData[] matches = Array.Empty<SourceMatchData>();
-    Common.Extenders.RegexParsedGroup[] groups = Array.Empty<Common.Extenders.RegexParsedGroup>();
-    int selectedGroupIndex = -1;
-    int selectedMatchIndex = -1;
+    bool                                inUpdating;
+    SourceMatchData[]                   matches              = Array.Empty<SourceMatchData>();
+    Common.Extenders.RegexParsedGroup[] groups               = Array.Empty<Common.Extenders.RegexParsedGroup>();
+    int                                 selectedGroupIndex   = -1;
+    HashSet<int>                        selectedMatchIndexes = new();
 
     public FMain() => InitializeComponent();
 
     void FMain_Load(object sender, EventArgs e)
     {
-        inUpdating = true;
-        txPATTERN.Text = _settings.Pattern;
-        txINPUT.Text = _settings.Text;
-        cbECMA.Checked = _settings.Options.HasFlag(RegexOptions.ECMAScript);
-        cbEXPLICIT.Checked = _settings.Options.HasFlag(RegexOptions.ExplicitCapture);
-        cbMULTILINE.Checked = _settings.Options.HasFlag(RegexOptions.Multiline);
+        inUpdating            = true;
+        txPATTERN.Text        = _settings.Pattern;
+        txINPUT.Text          = _settings.Text;
+        cbECMA.Checked        = _settings.Options.HasFlag(RegexOptions.ECMAScript);
+        cbEXPLICIT.Checked    = _settings.Options.HasFlag(RegexOptions.ExplicitCapture);
+        cbMULTILINE.Checked   = _settings.Options.HasFlag(RegexOptions.Multiline);
         cbLINE_BREAKS.Checked = _settings.Options.HasFlag(RegexOptions.Singleline);
         cbIGNORE_CASE.Checked = _settings.Options.HasFlag(RegexOptions.IgnoreCase);
-        cbNOBACK.Checked = _settings.Options.HasFlag(RegexOptions.NonBacktracking);
-        cbWORDWRAP.Checked = txINPUT.WordWrap = _settings.WordWrap;
-        inUpdating = false;
+        cbNOBACK.Checked      = _settings.Options.HasFlag(RegexOptions.NonBacktracking);
+        cbWORDWRAP.Checked    = txINPUT.WordWrap = _settings.WordWrap;
+        inUpdating            = false;
 
         updateMatches();
     }
@@ -51,9 +51,9 @@ public partial class FMain : Form
         if (newSelectedGroupIndex == selectedGroupIndex) return;
 
         selectedGroupIndex = newSelectedGroupIndex;
-        inUpdating = true;
+        inUpdating         = true;
         txPATTERN.UpdateHLPattern(groups, selectedGroupIndex);
-        txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndex);
+        txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndexes);
         inUpdating = false;
     }
 
@@ -74,9 +74,9 @@ public partial class FMain : Form
         if (newSelectedGroupIndex == selectedGroupIndex) return;
 
         selectedGroupIndex = newSelectedGroupIndex;
-        inUpdating = true;
+        inUpdating         = true;
         txPATTERN.UpdateHLPattern(groups, selectedGroupIndex);
-        txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndex);
+        txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndexes);
         inUpdating = false;
     }
 
@@ -92,19 +92,19 @@ public partial class FMain : Form
             if (string.IsNullOrWhiteSpace(txPATTERN.Text) || string.IsNullOrWhiteSpace(txINPUT.Text)) throw new Exception("No pattern or input data");
 
             var m = new Regex(txPATTERN.Text, 0, matchTimeout: TimeSpan.FromSeconds(3)).Matches(txINPUT.Text).ToArray();
-            matches = _sourceHelper.GetMatchesWithoutLines(m);
-            groups = txPATTERN.Text.ParseRegex();
+            matches            = _sourceHelper.GetMatchesWithoutLines(m);
+            groups             = txPATTERN.Text.ParseRegex();
             selectedGroupIndex = getSelectedRegexGroupIndex(txPATTERN.SelectionStart);
-            selectedMatchIndex = 0;
+            selectedMatchIndexes.Clear();
             txPATTERN.UpdateHLPattern(groups, selectedGroupIndex);
-            txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndex);
+            txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndexes);
             if (matches.Any())
                 lvRESULT.UpdateResult(matches);
             else lvRESULT.UpdateResult("No data matched");
         }
         catch (Exception e)
         {
-            matches = Array.Empty<SourceMatchData>();
+            matches            = Array.Empty<SourceMatchData>();
             selectedGroupIndex = -1;
 
             txPATTERN.ClearHighlight();
@@ -123,21 +123,17 @@ public partial class FMain : Form
     {
         if (lvRESULT.SelectedIndices.Count == 0) return;
 
-        selectedMatchIndex = -1;
-        var index = lvRESULT.SelectedIndices[0];
-        if (index < 0 || index >= matches.Length) return;
-
-        if (selectedMatchIndex == index) return;
-        selectedMatchIndex = index;
-
+        selectedMatchIndexes.Clear();
+        selectedMatchIndexes.UnionWith(lvRESULT.SelectedIndices.Cast<int>());
+        
         inUpdating = true;
-        txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndex);
+        txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndexes);
         inUpdating = false;
     }
 
     void lvRESULT_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e is { KeyCode: Keys.A, Control: true })
+        if (e is {KeyCode: Keys.A, Control: true})
         {
             lvRESULT.SelectedItems.Clear();
             for (var i = 0; i < lvRESULT.Items.Count; i++)
@@ -168,9 +164,9 @@ public partial class FMain : Form
     int getSelectedInputGroupIndex(int currentIndex)
     {
         foreach (var g in matches)
-            foreach (var item in g.Values)
-                if (item.Offset <= currentIndex && currentIndex <= item.Offset + item.Length)
-                    return item.InMatchIndex;
+        foreach (var item in g.Values)
+            if (item.Offset <= currentIndex && currentIndex <= item.Offset + item.Length)
+                return item.InMatchIndex;
         return -1;
     }
 
@@ -179,11 +175,11 @@ public partial class FMain : Form
     void cbECMA_CheckedChanged(object sender, EventArgs e)
     {
         if (inUpdating) return;
-        _settings.Options = (cbECMA.Checked ? RegexOptions.ECMAScript : 0) |
+        _settings.Options = (cbECMA.Checked ? RegexOptions.ECMAScript : 0)          |
                             (cbEXPLICIT.Checked ? RegexOptions.ExplicitCapture : 0) |
-                            (cbMULTILINE.Checked ? RegexOptions.Multiline : 0) |
-                            (cbLINE_BREAKS.Checked ? RegexOptions.Singleline : 0) |
-                            (cbIGNORE_CASE.Checked ? RegexOptions.IgnoreCase : 0) |
+                            (cbMULTILINE.Checked ? RegexOptions.Multiline : 0)      |
+                            (cbLINE_BREAKS.Checked ? RegexOptions.Singleline : 0)   |
+                            (cbIGNORE_CASE.Checked ? RegexOptions.IgnoreCase : 0)   |
                             (cbNOBACK.Checked ? RegexOptions.NonBacktracking : 0);
         _settings.Save();
         updateMatches();
