@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RETracer", "RETracer\RETrac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegExpTracerAvalonia", "RegExpTracerAvalonia\RegExpTracerAvalonia.csproj", "{539561CF-36DA-4134-821D-997C1CCF27EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{C8FF9EFB-E2F5-42A4-8973-B8DD65FE97EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RETracer2", "RETracer2\RETracer2.csproj", "{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{539561CF-36DA-4134-821D-997C1CCF27EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{539561CF-36DA-4134-821D-997C1CCF27EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{539561CF-36DA-4134-821D-997C1CCF27EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8FF9EFB-E2F5-42A4-8973-B8DD65FE97EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8FF9EFB-E2F5-42A4-8973-B8DD65FE97EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8FF9EFB-E2F5-42A4-8973-B8DD65FE97EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8FF9EFB-E2F5-42A4-8973-B8DD65FE97EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,8 +11,8 @@ public partial class OptionsForm : Form
         InitializeComponent();
 
         _settings              = settings;
-        _labelColor.ForeColor  = _settings.ForeColor;
-        _labelColor.BackColor  = _settings.BackColor;
+        _labelColor.ForeColor  = Color.FromArgb(_settings.ForeColor);
+        _labelColor.BackColor  = Color.FromArgb(_settings.BackColor);
         _numericTextSize.Value = (decimal) _settings.TextSize;
         switch (_settings.HighlighingType)
         {
@@ -27,7 +27,7 @@ public partial class OptionsForm : Form
 
         _listColorList.Items.Clear();
         foreach (var color in _settings.HighlightColorList)
-            _listColorList.Items.Add(color);
+            _listColorList.Items.Add(Color.FromArgb(color));
 
         _listColorList.Refresh();
     }
@@ -74,8 +74,8 @@ public partial class OptionsForm : Form
 
     void ButtonOK_Click(object sender, EventArgs e)
     {
-        _settings.ForeColor = _labelColor.ForeColor;
-        _settings.BackColor = _labelColor.BackColor;
+        _settings.ForeColor = _labelColor.ForeColor.ToArgb();
+        _settings.BackColor = _labelColor.BackColor.ToArgb();
         _settings.TextSize  = (float) _numericTextSize.Value;
         switch (_comboHighlightingType.SelectedIndex)
         {
@@ -90,9 +90,7 @@ public partial class OptionsForm : Form
 
         _settings.HighlightColorList.Clear();
         foreach (Color color in _listColorList.Items)
-        {
-            _settings.HighlightColorList.Add(color);
-        }
+            _settings.HighlightColorList.Add(color.ToArgb());
 
         _settings.Save();
         DialogResult = DialogResult.OK;

@@ -7,6 +7,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Common;
 using RegExpTracerAvalonia.Helpers;
 using RegExpTracerAvalonia.Models;
 using RegExpTracerAvalonia.ViewModels;

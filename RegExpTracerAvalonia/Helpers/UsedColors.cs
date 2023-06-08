@@ -18,5 +18,5 @@ static class UsedColors
     };
 
     public static readonly SolidColorBrush[] BackgroundBrushes =
-        ForegroundBrushes.Select((p, index) => new SolidColorBrush(p.Color, 0.4)).ToArray();
+        ForegroundBrushes.Select(p => new SolidColorBrush(p.Color, 0.4)).ToArray();
 }

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
+using Common;
 using RegExTracer;
 
 #pragma warning disable CS0162
@@ -16,6 +17,7 @@ public partial class Main : Form
     bool         _documentIsUnsaved;
     bool         _isHighlighting;
     RichTextBox? _textBoxCurrent;
+    SourceHelper _sourceHelper = new("");
 
     readonly Settings _settings = Settings.Load();
 
@@ -23,16 +25,19 @@ public partial class Main : Form
     {
         InitializeComponent();
         setCurrentTextBox(null);
-        txREGEX.ForeColor  = _settings.ForeColor;
-        txREGEX.BackColor  = _settings.BackColor;
-        txREGEX.Font       = new Font(txREGEX.Font.FontFamily, _settings.TextSize);
-        txDATA.ForeColor   = _settings.ForeColor;
-        txDATA.BackColor   = _settings.BackColor;
-        txDATA.Font        = new Font(txDATA.Font.FontFamily, _settings.TextSize);
-        txRESULT.ForeColor = _settings.ForeColor;
-        txRESULT.BackColor = _settings.BackColor;
+
+        txREGEX.ForeColor = Color.FromArgb(_settings.ForeColor);
+        txREGEX.BackColor = Color.FromArgb(_settings.BackColor);
+        txREGEX.Font      = new Font(txREGEX.Font.FontFamily, _settings.TextSize);
+
+        txDATA.ForeColor = Color.FromArgb(_settings.ForeColor);
+        txDATA.BackColor = Color.FromArgb(_settings.BackColor);
+        txDATA.Font      = new Font(txDATA.Font.FontFamily, _settings.TextSize);
+
+        txRESULT.ForeColor = Color.FromArgb(_settings.ForeColor);
+        txRESULT.BackColor = Color.FromArgb(_settings.BackColor);
         txRESULT.Font      = new Font(txRESULT.Font.FontFamily, _settings.TextSize);
-        _isHighlighting    = true;
+
         _isHighlighting    = false;
         _documentIsUnsaved = false;
     }
@@ -52,8 +57,8 @@ public partial class Main : Form
 
     void buildResult(BuildReason buildReason)
     {
-        var lines     = txDATA.Lines;
-        var textInput = string.Join(!coLINE_BREAKS.Checked ? "\n" : "\r\n", lines);
+        //var lines = txDATA.Lines;
+        //var textInput = string.Join(!coLINE_BREAKS.Checked ? "\n" : "\r\n", lines);
 
         var flags = (coECMA.Checked ? RegexOptions.ECMAScript : RegexOptions.None)          |
                     (coSINGLE_LINE.Checked ? RegexOptions.Singleline : RegexOptions.None)   |
@@ -62,18 +67,36 @@ public partial class Main : Form
                     (coMULTILINE.Checked ? RegexOptions.Multiline : RegexOptions.None)      |
                     (coIGNORE.Checked ? RegexOptions.IgnorePatternWhitespace : RegexOptions.None);
 
-        if (TextDocumentExtenders.BuildMatchList(txREGEX.Text.Replace("\r", "").Replace("\n", ""), textInput, flags, out var rangeArray, out var errMessage))
+        _sourceHelper.UpdateSource(txDATA.Text);
+        try
         {
+            var rx      = new Regex(txREGEX.Text, flags);
+            var matches = rx.Matches(txDATA.Text).ToArray();
+
             if (buildReason is BuildReason.Document or BuildReason.RegEx) txREGEX.ApplyHighlightRegEx(_settings);
-            if (buildReason is BuildReason.Document or BuildReason.Input) txREGEX.ApplyHighlightInput(txDATA, coLINE_BREAKS.Checked, _settings, rangeArray, textInput, lines);
-            txRESULT.ApplyHighlightResult(lvRESULT, _settings, rangeArray, textInput);
+            // if (buildReason is BuildReason.Document or BuildReason.Input) txREGEX.ApplyHighlightInput(txDATA, coLINE_BREAKS.Checked, _settings, rangeArray, textInput, lines);
+
+            txDATA.ApplyHighlightData(lvRESULT, txDATA.Text, _settings, _sourceHelper.GetMatches(matches));
         }
-        else
+        catch (Exception e)
         {
             txREGEX.ClearHighlightRegEx();
             txREGEX.ClearHighlightInput(txDATA);
-            txRESULT.ClearHighlightResult(errMessage);
+            txRESULT.ClearHighlightResult(e.Message);
         }
+
+        // if (TextDocumentExtenders.BuildMatchList(txREGEX.Text.Replace("\r", "").Replace("\n", ""), textInput, flags, out var rangeArray, out var errMessage))
+        // {
+        //     if (buildReason is BuildReason.Document or BuildReason.RegEx) txREGEX.ApplyHighlightRegEx(_settings);
+        //     if (buildReason is BuildReason.Document or BuildReason.Input) txREGEX.ApplyHighlightInput(txDATA, coLINE_BREAKS.Checked, _settings, rangeArray, textInput, lines);
+        //     txRESULT.ApplyHighlightResult(lvRESULT, _settings, rangeArray, textInput);
+        // }
+        // else
+        // {
+        //     txREGEX.ClearHighlightRegEx();
+        //     txREGEX.ClearHighlightInput(txDATA);
+        //     txRESULT.ClearHighlightResult(errMessage);
+        // }
     }
 
     #region documentOpen / documentSave
@@ -149,31 +172,36 @@ public partial class Main : Form
         var box = txREGEX;
         if (box == null) return;
 
-        var selectedText = box.SelectionLength > 0 ? box.SelectedText : box.Text;
-        selectedText = selectedText.Replace("\r", "").Replace("\n", "").Replace("\"", "\"\"");
-        string str2 = "0";
+        var selectedText = (box.SelectionLength > 0 ? box.SelectedText : box.Text)
+                          .Replace("\r", "")
+                          .Replace("\n", "")
+                          .Replace("\"", "\"\"");
+
+        var sb = new StringBuilder();
+        sb.Append("0");
         if (coECMA.Checked)
-            str2 = str2 + " | RegexOptions.ECMAScript";
+            sb.Append(" | RegexOptions.ECMAScript");
 
         if (coSINGLE_LINE.Checked)
-            str2 = str2 + " | RegexOptions.Singleline";
+            sb.Append(" | RegexOptions.Singleline");
 
         if (coEXPLICIT.Checked)
-            str2 = str2 + " | RegexOptions.ExplicitCapture";
+            sb.Append(" | RegexOptions.ExplicitCapture");
 
         if (coGNORE_CASE.Checked)
-            str2 = str2 + " | RegexOptions.IgnoreCase";
+            sb.Append(" | RegexOptions.IgnoreCase");
 
         if (coMULTILINE.Checked)
-            str2 = str2 + " | RegexOptions.Multiline";
+            sb.Append(" | RegexOptions.Multiline");
 
         if (coIGNORE.Checked)
-            str2 = str2 + " | RegexOptions.IgnorePatternWhitespace";
+            sb.Append(" | RegexOptions.IgnorePatternWhitespace");
 
-        if (str2.StartsWith("0 | "))
-            str2 = str2.Substring(4);
+        var s = sb.ToString();
+        if (s.StartsWith("0 | "))
+            s = s.Substring(4);
 
-        Clipboard.SetDataObject($"Regex regEx = new Regex(@\"{selectedText}\", {str2});");
+        Clipboard.SetDataObject($"Regex regEx = new Regex(@\"{selectedText}\", {s});");
     }
 
     void MenuItemEditCut_Click(object sender, EventArgs e)
@@ -240,14 +268,16 @@ public partial class Main : Form
     {
         if (new OptionsForm(_settings).ShowDialog(this) != DialogResult.OK) return;
 
-        txREGEX.ForeColor  = _settings.ForeColor;
-        txREGEX.BackColor  = _settings.BackColor;
-        txREGEX.Font       = new Font(txREGEX.Font.FontFamily, _settings.TextSize);
-        txDATA.ForeColor   = _settings.ForeColor;
-        txDATA.BackColor   = _settings.BackColor;
-        txDATA.Font        = new Font(txDATA.Font.FontFamily, _settings.TextSize);
-        txRESULT.ForeColor = _settings.ForeColor;
-        txRESULT.BackColor = _settings.BackColor;
+        txREGEX.ForeColor = Color.FromArgb(_settings.ForeColor);
+        txREGEX.BackColor = Color.FromArgb(_settings.BackColor);
+        txREGEX.Font      = new Font(txREGEX.Font.FontFamily, _settings.TextSize);
+
+        txDATA.ForeColor = Color.FromArgb(_settings.ForeColor);
+        txDATA.BackColor = Color.FromArgb(_settings.BackColor);
+        txDATA.Font      = new Font(txDATA.Font.FontFamily, _settings.TextSize);
+
+        txRESULT.ForeColor = Color.FromArgb(_settings.ForeColor);
+        txRESULT.BackColor = Color.FromArgb(_settings.BackColor);
         txRESULT.Font      = new Font(txRESULT.Font.FontFamily, _settings.TextSize);
 
         _isHighlighting = true;

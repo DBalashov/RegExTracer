@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Avalonia.Media;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Rendering;
+using Common;
 
 namespace RegExpTracerAvalonia.Helpers;
 

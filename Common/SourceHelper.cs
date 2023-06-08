@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RegExpTracerAvalonia.Helpers;
+namespace Common;
 
-class SourceHelper
+public class SourceHelper
 {
     public SourceLineItem[] LineInfos { get; private set; }
     public string           Source    { get; private set; }
@@ -88,11 +88,28 @@ class SourceHelper
                        .ToArray();
         return r!;
     }
+
+    public SourceMatchData[] GetMatchesWithoutLines(Match[] matches)
+    {
+        var r = matches.Select((p, matchIndex) =>
+                               {
+                                   var r = new List<SourceMatchDataItem>();
+                                   for (var i = 1; i < p.Groups.Count; i++)
+                                   {
+                                       var g = p.Groups[i];
+                                       r.Add(new SourceMatchDataItem(i - 1, g.Index, g.Length, g.Value));
+                                   }
+
+                                   return new SourceMatchData(0, matchIndex, r.ToArray());
+                               })
+                       .ToArray();
+        return r!;
+    }
 }
 
-record SourceLineItem(int Number, int Offset, int Length);
+public record SourceLineItem(int Number, int Offset, int Length);
 
-record SourceMatchItem(int LineNumber, int MatchIndex, int InMatchIndex, int Offset, int Length);
+public record SourceMatchItem(int LineNumber, int MatchIndex, int InMatchIndex, int Offset, int Length);
 
 public record SourceMatchData(int LineNumber, int MatchIndex, SourceMatchDataItem[] Values);
 

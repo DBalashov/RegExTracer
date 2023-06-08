@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using Avalonia.Controls.Templates;
+using Common;
 using ReactiveUI;
-using RegExpTracerAvalonia.Helpers;
 
 namespace RegExpTracerAvalonia.ViewModels;
 
