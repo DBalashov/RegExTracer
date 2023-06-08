@@ -1,35 +1,35 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using Common;
-using RETracer2.Extenders;
+using RETracer.Extenders;
 
-namespace RETracer2;
+namespace RETracer;
 
 public partial class FMain : Form
 {
-    readonly SourceHelper _sourceHelper = new("");
-    readonly Settings     _settings     = Settings.Load();
+    readonly SourceHelper sourceHelper         = new("");
+    readonly Settings     settings             = Settings.Load();
+    readonly HashSet<int> selectedMatchIndexes = new();
 
     bool                                inUpdating;
-    SourceMatchData[]                   matches              = Array.Empty<SourceMatchData>();
-    Common.Extenders.RegexParsedGroup[] groups               = Array.Empty<Common.Extenders.RegexParsedGroup>();
-    int                                 selectedGroupIndex   = -1;
-    HashSet<int>                        selectedMatchIndexes = new();
+    SourceMatchData[]                   matches            = Array.Empty<SourceMatchData>();
+    Common.Extenders.RegexParsedGroup[] groups             = Array.Empty<Common.Extenders.RegexParsedGroup>();
+    int                                 selectedGroupIndex = -1;
 
     public FMain() => InitializeComponent();
 
     void FMain_Load(object sender, EventArgs e)
     {
         inUpdating            = true;
-        txPATTERN.Text        = _settings.Pattern;
-        txINPUT.Text          = _settings.Text;
-        cbECMA.Checked        = _settings.Options.HasFlag(RegexOptions.ECMAScript);
-        cbEXPLICIT.Checked    = _settings.Options.HasFlag(RegexOptions.ExplicitCapture);
-        cbMULTILINE.Checked   = _settings.Options.HasFlag(RegexOptions.Multiline);
-        cbLINE_BREAKS.Checked = _settings.Options.HasFlag(RegexOptions.Singleline);
-        cbIGNORE_CASE.Checked = _settings.Options.HasFlag(RegexOptions.IgnoreCase);
-        cbNOBACK.Checked      = _settings.Options.HasFlag(RegexOptions.NonBacktracking);
-        cbWORDWRAP.Checked    = txINPUT.WordWrap = _settings.WordWrap;
+        txPATTERN.Text        = settings.Pattern;
+        txINPUT.Text          = settings.Text;
+        cbECMA.Checked        = settings.Options.HasFlag(RegexOptions.ECMAScript);
+        cbEXPLICIT.Checked    = settings.Options.HasFlag(RegexOptions.ExplicitCapture);
+        cbMULTILINE.Checked   = settings.Options.HasFlag(RegexOptions.Multiline);
+        cbIGNORE_CASE.Checked = settings.Options.HasFlag(RegexOptions.IgnoreCase);
+        cbNOBACK.Checked      = settings.Options.HasFlag(RegexOptions.NonBacktracking);
+        cbWORDWRAP.Checked    = txINPUT.WordWrap = settings.WordWrap;
+        nudTIMEOUT.Value      = settings.Timeout;
         inUpdating            = false;
 
         updateMatches();
@@ -39,10 +39,10 @@ public partial class FMain : Form
 
     void txPATTERN_TextChanged(object sender, EventArgs e)
     {
-        _sourceHelper.UpdateSource(txPATTERN.Text);
+        sourceHelper.UpdateSource(txPATTERN.Text);
         updateMatches();
-        _settings.Pattern = txPATTERN.Text;
-        _settings.Save();
+        settings.Pattern = txPATTERN.Text;
+        settings.Save();
     }
 
     void txPATTERN_SelectionChanged(object sender, EventArgs e)
@@ -64,8 +64,8 @@ public partial class FMain : Form
     void txINPUT_TextChanged(object sender, EventArgs e)
     {
         updateMatches();
-        _settings.Text = txINPUT.Text;
-        _settings.Save();
+        settings.Text = txINPUT.Text;
+        settings.Save();
     }
 
     void txINPUT_SelectionChanged(object sender, EventArgs e)
@@ -91,8 +91,10 @@ public partial class FMain : Form
 
             if (string.IsNullOrWhiteSpace(txPATTERN.Text) || string.IsNullOrWhiteSpace(txINPUT.Text)) throw new Exception("No pattern or input data");
 
-            var m = new Regex(txPATTERN.Text, 0, matchTimeout: TimeSpan.FromSeconds(3)).Matches(txINPUT.Text).ToArray();
-            matches            = _sourceHelper.GetMatchesWithoutLines(m);
+            var m = new Regex(txPATTERN.Text, 0, matchTimeout: TimeSpan.FromMilliseconds((int) nudTIMEOUT.Value))
+                   .Matches(txINPUT.Text)
+                   .ToArray();
+            matches            = sourceHelper.GetMatchesWithoutLines(m);
             groups             = txPATTERN.Text.ParseRegex();
             selectedGroupIndex = getSelectedRegexGroupIndex(txPATTERN.SelectionStart);
             selectedMatchIndexes.Clear();
@@ -125,7 +127,7 @@ public partial class FMain : Form
 
         selectedMatchIndexes.Clear();
         selectedMatchIndexes.UnionWith(lvRESULT.SelectedIndices.Cast<int>());
-        
+
         inUpdating = true;
         txINPUT.UpdateHLInput(matches, selectedGroupIndex, selectedMatchIndexes);
         inUpdating = false;
@@ -175,19 +177,32 @@ public partial class FMain : Form
     void cbECMA_CheckedChanged(object sender, EventArgs e)
     {
         if (inUpdating) return;
-        _settings.Options = (cbECMA.Checked ? RegexOptions.ECMAScript : 0)          |
-                            (cbEXPLICIT.Checked ? RegexOptions.ExplicitCapture : 0) |
-                            (cbMULTILINE.Checked ? RegexOptions.Multiline : 0)      |
-                            (cbLINE_BREAKS.Checked ? RegexOptions.Singleline : 0)   |
-                            (cbIGNORE_CASE.Checked ? RegexOptions.IgnoreCase : 0)   |
-                            (cbNOBACK.Checked ? RegexOptions.NonBacktracking : 0);
-        _settings.Save();
+        settings.Options = (cbECMA.Checked ? RegexOptions.ECMAScript : 0)          |
+                           (cbEXPLICIT.Checked ? RegexOptions.ExplicitCapture : 0) |
+                           (cbMULTILINE.Checked ? RegexOptions.Multiline : 0)      |
+                           (cbIGNORE_CASE.Checked ? RegexOptions.IgnoreCase : 0)   |
+                           (cbNOBACK.Checked ? RegexOptions.NonBacktracking : 0);
+        settings.Save();
         updateMatches();
     }
 
     void cbWORDWRAP_CheckedChanged(object sender, EventArgs e)
     {
-        txINPUT.WordWrap = _settings.WordWrap = cbNOBACK.Checked;
-        _settings.Save();
+        txINPUT.WordWrap = settings.WordWrap = cbNOBACK.Checked;
+        settings.Save();
+    }
+
+    void nudTIMEOUT_ValueChanged(object sender, EventArgs e)
+    {
+        settings.Timeout = (int) nudTIMEOUT.Value;
+    }
+
+    void FMain_ResizeEnd(object sender, EventArgs e)
+    {
+        if (lvRESULT.Columns.Count <= 1) return;
+        
+        var colWidth = (lvRESULT.Width - Extenders.Extenders.NUMBER_COL_WIDTH) / (lvRESULT.Columns.Count - 1);
+        foreach (var col in lvRESULT.Columns.OfType<ColumnHeader>().Skip(1))
+            col.Width = colWidth;
     }
 }

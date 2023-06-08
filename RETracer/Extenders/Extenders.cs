@@ -2,7 +2,7 @@
 using Nabu.Forms;
 using Nabu.Forms.TextObjectModel;
 
-namespace RETracer2.Extenders;
+namespace RETracer.Extenders;
 
 static class Extenders
 {
@@ -18,7 +18,7 @@ static class Extenders
         Color.DarkGoldenrod
     };
 
-    public static int toRTFColor(this Color color) => (color.B << 0x10) | (color.G << 8) | color.R;
+    static int toRTFColor(this Color color) => (color.B << 0x10) | (color.G << 8) | color.R;
 
     public static void ClearHighlight(this RichTextBoxEx txREGEX)
     {
@@ -71,7 +71,7 @@ static class Extenders
 
     #region UpdateResult
 
-    const int NUMBER_COL_WIDTH = 70;
+    public const int NUMBER_COL_WIDTH = 70;
 
     public static void UpdateResult(this ListView lv, SourceMatchData[] matchGroups)
     {

@@ -6,18 +6,20 @@
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
+        <ApplicationIcon>App.ico</ApplicationIcon>
+        <RootNamespace>RETracer</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Main.resx">
-        <DependentUpon>Main.cs</DependentUpon>
-        <SubType>Designer</SubType>
-      </EmbeddedResource>
+      <Content Include="..\readme.md">
+        <Link>readme.md</Link>
+      </Content>
+      <Content Include="App.ico" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="OptionsForm.cs">
-        <SubType>Form</SubType>
+      <Compile Update="Forms\Nabu.Forms.RichTextBoxEx.cs">
+        <SubType>Component</SubType>
       </Compile>
     </ItemGroup>
 

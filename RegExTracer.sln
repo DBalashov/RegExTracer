@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RETracer", "RETracer\RETracer.csproj", "{1272F006-646F-442B-B896-A6AD62590FA9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegExpTracerAvalonia", "RegExpTracerAvalonia\RegExpTracerAvalonia.csproj", "{539561CF-36DA-4134-821D-997C1CCF27EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{C8FF9EFB-E2F5-42A4-8973-B8DD65FE97EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RETracer2", "RETracer2\RETracer2.csproj", "{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RETracer", "RETracer\RETracer.csproj", "{0FD800A7-D035-4B8E-99E1-CA9F8C5FF908}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1272F006-646F-442B-B896-A6AD62590FA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1272F006-646F-442B-B896-A6AD62590FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1272F006-646F-442B-B896-A6AD62590FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1272F006-646F-442B-B896-A6AD62590FA9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{539561CF-36DA-4134-821D-997C1CCF27EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{539561CF-36DA-4134-821D-997C1CCF27EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{539561CF-36DA-4134-821D-997C1CCF27EC}.Release|Any CPU.ActiveCfg = Release|Any CPU

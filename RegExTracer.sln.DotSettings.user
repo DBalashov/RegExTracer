@@ -11,6 +11,6 @@
 	
 	
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=1272f006_002D646f_002D442b_002Db896_002Da6ad62590fa9_0023RETracer/@EntryIndexedValue">True</s:Boolean>
+	
 	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=610d2000_002D79a8_002D4368_002D9672_002D0abf909fae6d_0023RTester/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=d4f1bcfb_002Df32b_002D4ae8_002Dbc98_002De9d2c78d962d_0023RegExTracer/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
