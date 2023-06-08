@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+
 #pragma warning disable CS8618
 
 namespace RegExpTracerAvalonia.Models;
@@ -9,8 +11,10 @@ public class Settings
 {
     const string FILE_NAME = "regexp-tracer-avalonia.json";
 
-    public string Input   { get; set; }
-    public string Pattern { get; set; }
+    public string       Input    { get; set; }
+    public string       Pattern  { get; set; }
+    public RegexOptions Options  { get; set; }
+    public bool         WordWrap { get; set; }
 
     public static Settings Load()
     {

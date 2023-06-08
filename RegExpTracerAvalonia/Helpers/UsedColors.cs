@@ -1,18 +1,22 @@
-﻿using Avalonia.Media;
+﻿using System.Linq;
+using Avalonia.Media;
 
 namespace RegExpTracerAvalonia.Helpers;
 
 static class UsedColors
 {
-    public static readonly IBrush[] Brushes =
+    public static readonly SolidColorBrush[] ForegroundBrushes =
     {
-        new SolidColorBrush(Colors.Red,     0.4),
-        new SolidColorBrush(Colors.Green,   0.4),
-        new SolidColorBrush(Colors.Black,   0.4),
-        new SolidColorBrush(Colors.Fuchsia, 0.4),
-        new SolidColorBrush(Colors.Indigo,  0.4),
-        new SolidColorBrush(Colors.Coral,   0.4),
-        new SolidColorBrush(Colors.Blue,    0.4),
-        new SolidColorBrush(Colors.Yellow,  0.6),
+        new(Colors.Red),
+        new(Colors.Green),
+        new(Colors.Fuchsia),
+        new(Colors.Indigo),
+        new(Colors.Coral),
+        new(Colors.Blue),
+        new(Colors.SaddleBrown),
+        new(Colors.DarkGoldenrod),
     };
+
+    public static readonly SolidColorBrush[] BackgroundBrushes =
+        ForegroundBrushes.Select((p, index) => new SolidColorBrush(p.Color, 0.4)).ToArray();
 }

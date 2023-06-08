@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text.RegularExpressions;
 using Avalonia.Controls.Templates;
 using ReactiveUI;
 using RegExpTracerAvalonia.Helpers;
@@ -13,19 +14,52 @@ public class MainWindowViewModel : ReactiveObject
     bool                               _dataVisible;
     FuncDataTemplate<SourceMatchData>? _dataTemplate;
     bool                               _wordWrap;
+    RegexOptions                       _options;
 
-    public bool PatternExplicit   { get; set; }
-    public bool PatternIgnoreCase { get; set; }
-    public bool PatternMultiline  { get; set; }
-    public bool PatternSingleLine { get; set; }
-    public bool PatternLineBreaks { get; set; }
-    
+    public RegexOptions Options
+    {
+        get => _options;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _options, value);
+            this.RaisePropertyChanged(nameof(PatternExplicit));
+            this.RaisePropertyChanged(nameof(PatternMultiline));
+            this.RaisePropertyChanged(nameof(PatternSingleLine));
+            this.RaisePropertyChanged(nameof(PatternIgnoreCase));
+
+        }
+    }
+
+    public bool PatternExplicit
+    {
+        get => _options.HasFlag(RegexOptions.ExplicitCapture);
+        set => Options = value ? Options | RegexOptions.ExplicitCapture : Options & ~RegexOptions.ExplicitCapture;
+    }
+
+    public bool PatternIgnoreCase
+    {
+        get => _options.HasFlag(RegexOptions.IgnoreCase);
+        set => Options = value ? Options | RegexOptions.IgnoreCase : Options & ~RegexOptions.IgnoreCase;
+    }
+
+    public bool PatternMultiline
+    {
+        get => _options.HasFlag(RegexOptions.Multiline);
+        set => Options = value ? Options | RegexOptions.Multiline : Options & ~RegexOptions.Multiline;
+    }
+
+    public bool PatternSingleLine
+    {
+        get => _options.HasFlag(RegexOptions.Singleline);
+        set => Options = value ? Options | RegexOptions.Singleline : Options & ~RegexOptions.Singleline;
+    }
+
     public bool WordWrap
     {
         get => _wordWrap;
         set => this.RaiseAndSetIfChanged(ref _wordWrap, value);
     }
-    
+
     public string? Error
     {
         get => _error;

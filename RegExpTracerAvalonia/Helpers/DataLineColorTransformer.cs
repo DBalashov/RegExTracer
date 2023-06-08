@@ -16,9 +16,9 @@ class DataLineColorTransformer : DocumentColorizingTransformer
 
     readonly SourceHelper sourceHelper;
 
-    public DataLineColorTransformer(string pattern, string input)
+    public DataLineColorTransformer(string pattern, RegexOptions options, string input)
     {
-        rx           = new Regex(pattern);
+        rx           = new Regex(pattern, options);
         sourceHelper = new SourceHelper(input);
         matches      = rx.Matches(input).ToArray();
     }
@@ -34,9 +34,9 @@ class DataLineColorTransformer : DocumentColorizingTransformer
                                visualLine =>
                                {
                                    if (IsSelected(item))
-                                       visualLine.TextRunProperties.Typeface = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Italic, FontWeight.Bold);
+                                       visualLine.TextRunProperties.Typeface = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Italic, FontWeight.Heavy);
 
-                                   visualLine.TextRunProperties.BackgroundBrush = UsedColors.Brushes[item.InMatchIndex % UsedColors.Brushes.Length];
+                                   visualLine.TextRunProperties.ForegroundBrush = UsedColors.ForegroundBrushes[item.InMatchIndex % UsedColors.BackgroundBrushes.Length];
                                });
             }
             catch
@@ -47,12 +47,12 @@ class DataLineColorTransformer : DocumentColorizingTransformer
     bool IsSelected(SourceMatchItem m) =>
         selected.Any(c => c.LineNumber == m.LineNumber && c.MatchIndex == m.MatchIndex);
 
-    public bool TryUpdatePattern(string pattern, out Exception? error)
+    public bool TryUpdatePattern(string pattern, RegexOptions options, out Exception? error)
     {
         error = null;
         try
         {
-            rx      = new Regex(pattern);
+            rx      = new Regex(pattern, options);
             matches = rx.Matches(sourceHelper.Source).ToArray();
             return matches.Length > 0;
         }

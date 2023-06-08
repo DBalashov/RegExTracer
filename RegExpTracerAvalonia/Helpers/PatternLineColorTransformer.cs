@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Media;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Rendering;
 
@@ -8,42 +9,42 @@ namespace RegExpTracerAvalonia.Helpers;
 
 class PatternLineColorTransformer : DocumentColorizingTransformer
 {
-    RegexParsedGroup[]? parsedGroups;
+    RegexParsedGroup[] parsedGroups = Array.Empty<RegexParsedGroup>();
 
     public PatternLineColorTransformer(string pattern) => UpdatePattern(pattern);
 
     public void UpdatePattern(string pattern) => parsedGroups = parseRegex(pattern);
 
-    RegexParsedGroup[]? parseRegex(string source)
+    RegexParsedGroup[] parseRegex(string source)
     {
-        var r = new List<RegexParsedGroup>();
-        if (string.IsNullOrWhiteSpace(source)) return r.ToArray();
+        if (string.IsNullOrWhiteSpace(source))
+            return Array.Empty<RegexParsedGroup>();
 
-        var currentIndex = 0;
-        while (currentIndex != -1 && currentIndex < source.Length)
+        var r     = new List<RegexParsedGroup>();
+        var stack = new Stack<int>();
+
+        var lineIndex = 0;
+        for (var i = 0; i < source.Length; i++)
         {
-            var startIndex = source.IndexOf('(', currentIndex);
-            if (startIndex < 0) break;
-
-            if (startIndex > 0 && source[startIndex - 1] == '\\') // escaped: \(
+            switch (source[i])
             {
-                currentIndex = startIndex + 1;
-                continue;
+                case '(' when i == 0 || (i > 0 && source[i - 1] != '\\'): // escaped: \(
+                    stack.Push(i);
+                    break;
+                case ')' when stack.Count == 0 && (i == 0 || (i > 0 && source[i - 1] == '\\')): // escaped: \)
+                    continue;
+                case ')':
+                {
+                    if (stack.Count == 0) continue;
+                    var startIndex = stack.Pop();
+                    if (stack.Count == 0)
+                        r.Add(new RegexParsedGroup(lineIndex, r.Count, startIndex, i));
+                    break;
+                }
+                case '\n':
+                    lineIndex++;
+                    break;
             }
-
-            var endIndex = -1;
-            while (true)
-            {
-                endIndex = source.IndexOf(')', startIndex);
-
-                if (endIndex < 0) return null; // no closing ) -> error
-                if (endIndex <= 0 || source[endIndex - 1] != '\\') break;
-
-                startIndex = endIndex + 1;
-            }
-
-            r.Add(new RegexParsedGroup(0, r.Count, startIndex, endIndex));
-            currentIndex = endIndex + 1;
         }
 
         return r.ToArray();
@@ -51,12 +52,15 @@ class PatternLineColorTransformer : DocumentColorizingTransformer
 
     protected override void ColorizeLine(DocumentLine line)
     {
-        if (parsedGroups == null) return;
         foreach (var pg in parsedGroups.Where(p => p.LineNumber == line.LineNumber - 1))
             ChangeLinePart(pg.StartOffset,
                            pg.EndOffset + 1,
-                           visualLine => visualLine.TextRunProperties.BackgroundBrush = UsedColors.Brushes[pg.Index % UsedColors.Brushes.Length]);
+                           visualLine =>
+                           {
+                               visualLine.TextRunProperties.Typeface        = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Normal, FontWeight.Bold);
+                               visualLine.TextRunProperties.ForegroundBrush = UsedColors.ForegroundBrushes[pg.Index % UsedColors.BackgroundBrushes.Length];
+                           });
     }
 
-    record RegexParsedGroup(int LineNumber, int Index, int StartOffset, int EndOffset);
+    sealed record RegexParsedGroup(int LineNumber, int Index, int StartOffset, int EndOffset);
 }

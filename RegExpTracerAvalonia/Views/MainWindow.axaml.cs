@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RegExpTracerAvalonia.Helpers;
 using RegExpTracerAvalonia.Models;
@@ -18,18 +20,21 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = new MainWindowViewModel();
     }
-    
+
     void WindowBase_OnActivated(object? sender, EventArgs e)
     {
+        var settings = Settings.Load();
+
         edInput.TextArea.TextView.LineTransformers.Clear();
-        edInput.TextArea.TextView.LineTransformers.Add(new DataLineColorTransformer(edPattern.Text, edInput.Text));
-        
+        edInput.TextArea.TextView.LineTransformers.Add(new DataLineColorTransformer(edPattern.Text, settings.Options, edInput.Text));
+
         edPattern.TextArea.TextView.LineTransformers.Clear();
         edPattern.TextArea.TextView.LineTransformers.Add(new PatternLineColorTransformer(edPattern.Text));
 
-        var settings = Settings.Load();
-        edInput.Text   = settings.Input;
-        edPattern.Text = settings.Pattern;
+        edInput.Text                                 = settings.Input;
+        edPattern.Text                               = settings.Pattern;
+        ((MainWindowViewModel) DataContext).Options  = settings.Options;
+        ((MainWindowViewModel) DataContext).WordWrap = settings.WordWrap;
     }
 
     protected override void OnClosed(EventArgs e)
@@ -37,8 +42,10 @@ public partial class MainWindow : Window
         base.OnClosed(e);
         new Settings()
         {
-            Input   = edInput.Text,
-            Pattern = edPattern.Text
+            Input    = edInput.Text,
+            Pattern  = edPattern.Text,
+            Options  = ((MainWindowViewModel) DataContext).Options,
+            WordWrap = ((MainWindowViewModel) DataContext).WordWrap
         }.Save();
     }
 
@@ -47,7 +54,7 @@ public partial class MainWindow : Window
         var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         if (DataContext is MainWindowViewModel vm)
         {
-            if (!lct.TryUpdatePattern(edPattern.Text, out var ex))
+            if (!lct.TryUpdatePattern(edPattern.Text, vm.Options, out var ex))
             {
                 if (ex != null) vm.Error = ex.Message;
                 else vm.Data             = Array.Empty<SourceMatchData>();
@@ -82,9 +89,9 @@ public partial class MainWindow : Window
                                                                         });
             }
         }
-        
+
         edInput.TextArea.TextView.Redraw();
-        
+
         var pct = edPattern.TextArea.TextView.LineTransformers.OfType<PatternLineColorTransformer>().First();
         pct.UpdatePattern(edPattern.Text);
         edPattern.TextArea.TextView.Redraw();
@@ -124,7 +131,7 @@ public partial class MainWindow : Window
             var tb = new TextBlock
                      {
                          Text                = "#" + (i + 1),
-                         Background          = UsedColors.Brushes[i % first.Values.Length],
+                         Background          = UsedColors.BackgroundBrushes[i % first.Values.Length],
                          HorizontalAlignment = HorizontalAlignment.Stretch,
                          Margin              = new Thickness(0, 0, 0, 0)
                      };
@@ -136,7 +143,7 @@ public partial class MainWindow : Window
     void lbDATA_OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e is not {Key: Key.C, KeyModifiers: KeyModifiers.Control}) return;
-        
+
         var data = string.Join(Environment.NewLine,
                                lbDATA.SelectedItems
                                      .OfType<SourceMatchData>()
@@ -151,5 +158,11 @@ public partial class MainWindow : Window
         var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         lct.UpdateSelected(m);
         edInput.TextArea.TextView.Redraw();
+    }
+
+    void options_OnClick(object? sender, RoutedEventArgs e)
+    {
+        edPattern_OnTextChanged(sender, e);
+        edInput_OnTextChanged(sender, e);
     }
 }

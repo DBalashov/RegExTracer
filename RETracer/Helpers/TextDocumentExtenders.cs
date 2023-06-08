@@ -67,7 +67,7 @@ static class TextDocumentExtenders
     }
 
     public static void ApplyHighlightInput(this RichTextBoxEx txREGEX,   RichTextBoxEx txDATA,    bool   lineBreaks,
-                                           Settings           _settings, Range[][][]   matchList, string textInput,  string[] textInputLineList)
+                                           Settings           _settings, Range[][][]   matchList, string textInput, string[] textInputLineList)
     {
         txREGEX.ClearHighlightInput(txDATA);
         var inputArray = new HighlightingInput[4];
@@ -86,19 +86,20 @@ static class TextDocumentExtenders
         {
             case false:
                 numArray = new int[txDATA.TextLength + 1];
-                for (int j = 0; j < numArray.Length; j++) numArray[j] = j;
+                for (var j = 0; j < numArray.Length; j++) numArray[j] = j;
                 break;
 
             case true:
             {
                 numArray = new int[txDATA.TextLength + textInputLineList.Length + 1];
-                int num2 = 0;
+                var nextVal = 0;
                 for (var k = 0; k < textInputLineList.Length; k++)
                 {
-                    int length                                                = textInputLineList[k].Length;
-                    for (int m = 0; m < length; m++) numArray[(num2 + m) + k] = num2 + m;
-                    numArray[(num2 + length) + k] =  num2   + length;
-                    num2                          += length + 1;
+                    var length = textInputLineList[k].Length;
+                    for (int m = 0; m < length; m++)
+                        numArray[(nextVal + m) + k] = nextVal + m;
+                    numArray[(nextVal + length) + k] =  nextVal + length;
+                    nextVal                          += length  + 1;
                 }
 
                 break;
@@ -317,7 +318,7 @@ static class TextDocumentExtenders
 
         return errorMessage == null;
     }
-    
+
     public static void ApplyHighlightRegEx(this RichTextBoxEx txREGEX, Settings _settings)
     {
         txREGEX.ClearHighlightRegEx();
@@ -327,16 +328,18 @@ static class TextDocumentExtenders
         var ex           = exArray[2];
         var textDocument = txREGEX.TextDocument!;
         textDocument.Freeze();
+
         var range = textDocument.Range(0, txREGEX.TextLength);
         range.Para.SpaceBefore = 1f;
         range.Para.SpaceAfter  = 1f;
+
         var text  = txREGEX.Text;
         var stack = new Stack<RegExParserState>();
         stack.Push(RegExParserState.Default);
         int num = 0;
         for (int i = 0; i < text.Length; i++)
         {
-            Color transparent = Color.Transparent;
+            var transparent = Color.Transparent;
             switch (stack.Peek())
             {
                 case RegExParserState.Default:
