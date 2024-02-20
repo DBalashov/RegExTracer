@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Avalonia.Controls.Templates;
 using Common;
@@ -12,7 +13,7 @@ public class MainWindowViewModel : ReactiveObject
     string?                            _error;
     bool                               _errorVisible;
     bool                               _dataVisible;
-    FuncDataTemplate<SourceMatchData>? _dataTemplate;
+    FuncDataTemplate<SourceMatchData>? _itemTemplate;
     bool                               _wordWrap;
     RegexOptions                       _options;
 
@@ -26,7 +27,6 @@ public class MainWindowViewModel : ReactiveObject
             this.RaisePropertyChanged(nameof(PatternMultiline));
             this.RaisePropertyChanged(nameof(PatternSingleLine));
             this.RaisePropertyChanged(nameof(PatternIgnoreCase));
-
         }
     }
 
@@ -89,14 +89,14 @@ public class MainWindowViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _data, value);
-            DataVisible = value != null;
+            DataVisible = value != null && value.Any();
             Error       = value != null && value.Any() ? null : "No data";
         }
     }
 
-    public FuncDataTemplate<SourceMatchData>? DataTemplate
+    public FuncDataTemplate<SourceMatchData>? ItemTemplate
     {
-        get => _dataTemplate;
-        set => this.RaiseAndSetIfChanged(ref _dataTemplate, value);
+        get => _itemTemplate;
+        set => this.RaiseAndSetIfChanged(ref _itemTemplate, value);
     }
 }

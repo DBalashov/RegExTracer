@@ -7,7 +7,7 @@ using AvaloniaEdit.Rendering;
 
 namespace RegExpTracerAvalonia.Helpers;
 
-class PatternLineColorTransformer : DocumentColorizingTransformer
+sealed class PatternLineColorTransformer : DocumentColorizingTransformer
 {
     RegexParsedGroup[] parsedGroups = Array.Empty<RegexParsedGroup>();
 
@@ -57,8 +57,8 @@ class PatternLineColorTransformer : DocumentColorizingTransformer
                            pg.EndOffset + 1,
                            visualLine =>
                            {
-                               visualLine.TextRunProperties.Typeface        = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Normal, FontWeight.Bold);
-                               visualLine.TextRunProperties.ForegroundBrush = UsedColors.ForegroundBrushes[pg.Index % UsedColors.BackgroundBrushes.Length];
+                               visualLine.TextRunProperties.SetTypeface(new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Normal, FontWeight.Bold));
+                               visualLine.TextRunProperties.SetForegroundBrush(UsedColors.ForegroundBrushes[pg.Index % UsedColors.BackgroundBrushes.Length]);
                            });
     }
 

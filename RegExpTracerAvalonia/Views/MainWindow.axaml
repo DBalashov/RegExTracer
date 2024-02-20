@@ -1,16 +1,20 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RegExpTracerAvalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+        xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         mc:Ignorable="d" Width="1200" Height="800"
         WindowStartupLocation="CenterScreen"
         x:Class="RegExpTracerAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="RegExpTracer.Avalonia"
-        Activated="WindowBase_OnActivated">
+        Opened="OnWindowOpened">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
 
     <Grid ShowGridLines="True">
         <Grid.RowDefinitions>
@@ -35,13 +39,15 @@
                        Padding="2" Margin="2"
                        Background="#dbdbdb"
                        Text="Regular expression" />
-            <avaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
+            <AvaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
                                      Name="edPattern"
-                                     Text=""
+                                     Text="123"
                                      TextChanged="edPattern_OnTextChanged"
-                                     FontFamily="Jetbrains Mono" />
+                                     FontFamily="Jetbrains Mono"
+                                     IsEnabled="True"
+                                     IsVisible="True" />
 
             <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
                 <Grid>
@@ -74,7 +80,7 @@
                        Padding="2" Margin="2"
                        Background="#dbdbdb"
                        Text="Input" />
-            <avaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
+            <AvaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
                                      Name="edInput"
                                      WordWrap="{Binding WordWrap}"
                                      TextChanged="edInput_OnTextChanged"
@@ -107,11 +113,12 @@
                      HorizontalAlignment="Stretch"
                      SelectionMode="Multiple"
                      VerticalAlignment="Stretch"
-                     ItemTemplate="{Binding DataTemplate}"
-                     Items="{Binding Data}"
+                     ItemsSource="{Binding Data}"
+                     ItemTemplate="{Binding ItemTemplate}"
                      SelectionChanged="lbDATA_OnSelectionChanged"
                      Name="lbDATA"
-                     KeyDown="lbDATA_OnKeyDown" />
+                     KeyDown="lbDATA_OnKeyDown">
+            </ListBox>
         </Grid>
     </Grid>
 </Window>

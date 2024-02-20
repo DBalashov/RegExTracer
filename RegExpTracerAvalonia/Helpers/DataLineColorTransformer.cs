@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Avalonia.Media;
@@ -9,7 +9,7 @@ using Common;
 
 namespace RegExpTracerAvalonia.Helpers;
 
-class DataLineColorTransformer : DocumentColorizingTransformer
+sealed class DataLineColorTransformer : DocumentColorizingTransformer
 {
     Match[]           matches;
     Regex             rx;
@@ -35,13 +35,14 @@ class DataLineColorTransformer : DocumentColorizingTransformer
                                visualLine =>
                                {
                                    if (IsSelected(item))
-                                       visualLine.TextRunProperties.Typeface = new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Italic, FontWeight.Heavy);
+                                       visualLine.TextRunProperties.SetTypeface(new Typeface(visualLine.TextRunProperties.Typeface.FontFamily, FontStyle.Italic, FontWeight.Heavy));
 
-                                   visualLine.TextRunProperties.ForegroundBrush = UsedColors.ForegroundBrushes[item.InMatchIndex % UsedColors.BackgroundBrushes.Length];
+                                   visualLine.TextRunProperties.SetForegroundBrush(UsedColors.ForegroundBrushes[item.InMatchIndex % UsedColors.BackgroundBrushes.Length]);
                                });
             }
-            catch
+            catch (Exception e)
             {
+                Debug.WriteLine(e.Message);
             }
     }
 
@@ -55,7 +56,7 @@ class DataLineColorTransformer : DocumentColorizingTransformer
         {
             rx      = new Regex(pattern, options);
             matches = rx.Matches(sourceHelper.Source).ToArray();
-            return matches.Length > 0;
+            return true;
         }
         catch (Exception e)
         {
@@ -74,8 +75,6 @@ class DataLineColorTransformer : DocumentColorizingTransformer
 
     public SourceMatchData[] GetMatches() => sourceHelper.GetMatches(matches);
 
-    public void UpdateSelected(SourceMatchData[] selected)
-    {
-        this.selected = selected;
-    }
+    public void UpdateSelected(SourceMatchData[] newSelected) =>
+        selected = newSelected;
 }

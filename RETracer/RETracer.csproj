@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -18,13 +18,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Forms\Nabu.Forms.RichTextBoxEx.cs">
-        <SubType>Component</SubType>
-      </Compile>
+      <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Common\Common.csproj" />
+      <Compile Update="Forms\Nabu.Forms.RichTextBoxEx.cs">
+        <SubType>Component</SubType>
+      </Compile>
     </ItemGroup>
 
 </Project>

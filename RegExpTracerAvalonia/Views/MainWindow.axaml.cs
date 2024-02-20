@@ -1,5 +1,4 @@
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -19,12 +18,17 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel();
     }
 
-    void WindowBase_OnActivated(object? sender, EventArgs e)
+    void OnWindowOpened(object? sender, EventArgs e)
     {
         var settings = Settings.Load();
+
+        DataContext = new MainWindowViewModel()
+                      {
+                          Options  = settings.Options,
+                          WordWrap = settings.WordWrap
+                      };
 
         edInput.TextArea.TextView.LineTransformers.Clear();
         edInput.TextArea.TextView.LineTransformers.Add(new DataLineColorTransformer(edPattern.Text, settings.Options, edInput.Text));
@@ -32,22 +36,21 @@ public partial class MainWindow : Window
         edPattern.TextArea.TextView.LineTransformers.Clear();
         edPattern.TextArea.TextView.LineTransformers.Add(new PatternLineColorTransformer(edPattern.Text));
 
-        edInput.Text                                 = settings.Input;
-        edPattern.Text                               = settings.Pattern;
-        ((MainWindowViewModel) DataContext).Options  = settings.Options;
-        ((MainWindowViewModel) DataContext).WordWrap = settings.WordWrap;
+        edInput.Text   = settings.Input;
+        edPattern.Text = settings.Pattern;
     }
 
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        new Settings()
-        {
-            Input    = edInput.Text,
-            Pattern  = edPattern.Text,
-            Options  = ((MainWindowViewModel) DataContext).Options,
-            WordWrap = ((MainWindowViewModel) DataContext).WordWrap
-        }.Save();
+        if (DataContext is MainWindowViewModel vm)
+            new Settings()
+            {
+                Input    = edInput.Text,
+                Pattern  = edPattern.Text,
+                Options  = vm.Options,
+                WordWrap = vm.WordWrap
+            }.Save();
     }
 
     void edPattern_OnTextChanged(object? sender, EventArgs e)
@@ -65,9 +68,9 @@ public partial class MainWindow : Window
                 vm.Data = lct.GetMatches();
                 updateDataHeader(vm.Data);
 
-                vm.DataTemplate = new FuncDataTemplate<SourceMatchData>((value, namescope) =>
+                vm.ItemTemplate = new FuncDataTemplate<SourceMatchData>((value, _) =>
                                                                         {
-                                                                            var grid = new Grid() {HorizontalAlignment = HorizontalAlignment.Stretch};
+                                                                            var grid = new Grid() {HorizontalAlignment = HorizontalAlignment.Stretch, MaxHeight = 20};
 
                                                                             grid.ColumnDefinitions.Add(new ColumnDefinition(45, GridUnitType.Pixel));
                                                                             for (var i = 0; i < value.Values.Length; i++)
@@ -102,9 +105,7 @@ public partial class MainWindow : Window
     {
         var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         if (DataContext is MainWindowViewModel vm)
-        {
             vm.Data = !lct.UpdateSource(edInput.Text) ? Array.Empty<SourceMatchData>() : lct.GetMatches();
-        }
 
         edInput.TextArea.TextView.Redraw();
     }
@@ -146,16 +147,16 @@ public partial class MainWindow : Window
         if (e is not {Key: Key.C, KeyModifiers: KeyModifiers.Control}) return;
 
         var data = string.Join(Environment.NewLine,
-                               lbDATA.SelectedItems
+                               lbDATA.SelectedItems!
                                      .OfType<SourceMatchData>()
                                      .OrderBy(p => p.MatchIndex)
                                      .Select(p => p.MatchIndex + "\t" + string.Join('\t', p.Values.Select(c => c.Value))));
-        Application.Current!.Clipboard!.SetTextAsync(data).ConfigureAwait(false).GetAwaiter().GetResult();
+        Clipboard?.SetTextAsync(data).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     void lbDATA_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        var m   = lbDATA.SelectedItems.OfType<SourceMatchData>().ToArray();
+        var m   = lbDATA.SelectedItems!.OfType<SourceMatchData>().ToArray();
         var lct = edInput.TextArea.TextView.LineTransformers.OfType<DataLineColorTransformer>().First();
         lct.UpdateSelected(m);
         edInput.TextArea.TextView.Redraw();
