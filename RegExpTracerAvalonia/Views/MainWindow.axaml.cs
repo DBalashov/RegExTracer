@@ -71,12 +71,17 @@ public partial class MainWindow : Window
                 vm.ItemTemplate = new FuncDataTemplate<SourceMatchData>((value, _) =>
                                                                         {
                                                                             var grid = new Grid() {HorizontalAlignment = HorizontalAlignment.Stretch, MaxHeight = 20};
+                                                                            if (value == null!) return grid;
 
                                                                             grid.ColumnDefinitions.Add(new ColumnDefinition(45, GridUnitType.Pixel));
                                                                             for (var i = 0; i < value.Values.Length; i++)
                                                                                 grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
 
-                                                                            grid.Children.Add(new TextBlock {Text = value.MatchIndex.ToString()});
+                                                                            grid.Children.Add(new TextBlock
+                                                                                              {
+                                                                                                  Text     = value.MatchIndex.ToString(),
+                                                                                                  FontSize = 11
+                                                                                              });
                                                                             for (var i = 0; i < value.Values.Length; i++)
                                                                             {
                                                                                 var item = value.Values[i];
@@ -84,6 +89,7 @@ public partial class MainWindow : Window
                                                                                          {
                                                                                              Text                = item.Value,
                                                                                              HorizontalAlignment = HorizontalAlignment.Stretch,
+                                                                                             FontSize            = 11
                                                                                          };
                                                                                 Grid.SetColumn(tb, i + 1);
                                                                                 grid.Children.Add(tb);

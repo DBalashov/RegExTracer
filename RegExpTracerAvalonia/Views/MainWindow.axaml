@@ -16,38 +16,36 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid ShowGridLines="True">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
             <RowDefinition Height="*" />
             <RowDefinition Height="300" />
+            <RowDefinition Height="20" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Column="0" Grid.Row="0"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch">
+        <Grid Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="210" />
+                <ColumnDefinition Width="5" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="20" />
+                <RowDefinition Height="17" />
+                <RowDefinition Height="1" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock HorizontalAlignment="Stretch"
-                       TextAlignment="Left"
-                       Padding="2" Margin="2"
-                       Background="#dbdbdb"
-                       Text="Regular expression" />
-            <AvaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
+            <TextBlock HorizontalAlignment="Stretch" TextAlignment="Left" Margin="2,2,2,0" Text="Regular expression" FontSize="10"/>
+            <Border Grid.Column="0" Grid.Row="1" Background="Silver" Height="1" Margin="2,1,2,0"/>
+            <AvaloniaEdit:TextEditor Grid.Column="0" Grid.Row="2"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
                                      Name="edPattern"
-                                     Text="123"
                                      TextChanged="edPattern_OnTextChanged"
                                      FontFamily="Jetbrains Mono"
                                      IsEnabled="True"
-                                     IsVisible="True" />
+                                     IsVisible="True"
+                                     Margin="1,1,1,0"/>
 
             <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
                 <Grid>
@@ -60,7 +58,7 @@
                         <CheckBox IsChecked="{Binding PatternExplicit}" Click="options_OnClick">Explicit</CheckBox>
                         <CheckBox IsChecked="{Binding PatternMultiline}" Click="options_OnClick">Multiline</CheckBox>
                     </StackPanel>
-                    <StackPanel Grid.Column="1">
+                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
                         <CheckBox IsChecked="{Binding PatternIgnoreCase}" Click="options_OnClick">Ignore case</CheckBox>
                         <CheckBox IsChecked="{Binding PatternSingleLine}" Click="options_OnClick">Single line</CheckBox>
                     </StackPanel>
@@ -68,47 +66,34 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Column="0" Grid.Row="1"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch">
+        <Grid Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
-                <RowDefinition Height="20" />
+                <RowDefinition Height="17" />
+                <RowDefinition Height="1" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock HorizontalAlignment="Stretch"
-                       TextAlignment="Left"
-                       Padding="2" Margin="2"
-                       Background="#dbdbdb"
-                       Text="Input" />
-            <AvaloniaEdit:TextEditor Grid.Column="0" Grid.Row="1"
+            <TextBlock HorizontalAlignment="Stretch" TextAlignment="Left" Margin="2,2,2,0" Text="Input" FontSize="10"/>
+            <Border Grid.Column="0" Grid.Row="1" Background="Silver" Height="1" Margin="2,1,2,0"/>
+            <AvaloniaEdit:TextEditor Grid.Column="0" Grid.Row="2"
                                      Name="edInput"
                                      WordWrap="{Binding WordWrap}"
                                      TextChanged="edInput_OnTextChanged"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
-                                     FontFamily="Jetbrains Mono" />
+                                     FontFamily="Jetbrains Mono"
+                                     Margin="1,1,1,0"/>
         </Grid>
 
-        <Grid Grid.Column="0" Grid.Row="2"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch">
+        <Grid Grid.Column="0" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
-                <RowDefinition Height="20" />
+                <RowDefinition Height="1" />
+                <RowDefinition Height="17" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Margin="10,0,10,0"
-                  Name="gridDataHeader" />
-
-            <TextBlock Grid.Row="1"
-                       IsVisible="{Binding ErrorVisible}"
-                       HorizontalAlignment="Stretch"
-                       Foreground="Red"
-                       Text="{Binding Error}" />
-            <ListBox Grid.Row="1"
+            <Border Grid.Row="0" Background="Silver" Height="1" Margin="2,1,2,0"/>
+            <Grid Grid.Row="1" IsVisible="{Binding DataVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0,10,0" Name="gridDataHeader" />
+            <TextBlock Grid.Row="1" IsVisible="{Binding ErrorVisible}" HorizontalAlignment="Stretch" Margin="2,0,2,0" Foreground="Red" Text="{Binding Error}" />
+            <ListBox Grid.Row="2"
                      IsVisible="{Binding DataVisible}"
                      HorizontalAlignment="Stretch"
                      SelectionMode="Multiple"
@@ -117,8 +102,11 @@
                      ItemTemplate="{Binding ItemTemplate}"
                      SelectionChanged="lbDATA_OnSelectionChanged"
                      Name="lbDATA"
-                     KeyDown="lbDATA_OnKeyDown">
+                     KeyDown="lbDATA_OnKeyDown"
+                     FontSize="10">
             </ListBox>
         </Grid>
+
+        <TextBlock Grid.Row="3">Select rows and press Ctrl+C for copy to clipboard</TextBlock>
     </Grid>
 </Window>
