@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -15,14 +17,15 @@ namespace RegExpTracerAvalonia.Views;
 
 public partial class MainWindow : Window
 {
-    public MainWindow()
-    {
-        InitializeComponent();
-    }
+    const int FONT_RESULT_SIZE = 11;
+
+    public MainWindow() => InitializeComponent();
 
     void OnWindowOpened(object? sender, EventArgs e)
     {
         var settings = Settings.Load();
+        if (settings.Items.Any())
+            rebuildHistory(settings.Items);
 
         DataContext = new MainWindowViewModel()
                       {
@@ -30,27 +33,71 @@ public partial class MainWindow : Window
                           WordWrap = settings.WordWrap
                       };
 
+        edInput.BeginChange();
         edInput.TextArea.TextView.LineTransformers.Clear();
         edInput.TextArea.TextView.LineTransformers.Add(new DataLineColorTransformer(edPattern.Text, settings.Options, edInput.Text));
-
+        edInput.EndChange();
+        
+        edPattern.BeginChange();
         edPattern.TextArea.TextView.LineTransformers.Clear();
         edPattern.TextArea.TextView.LineTransformers.Add(new PatternLineColorTransformer(edPattern.Text));
-
+        edPattern.EndChange();
+        
         edInput.Text   = settings.Input;
         edPattern.Text = settings.Pattern;
+    }
+
+    void rebuildHistory(List<SettingsItem> items)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+
+        menuItemHistory.Items.Clear();
+
+        var subItemHistory = new MenuItem() {Header = "Clear"};
+        subItemHistory.Click += subItemHistoryClear_Click;
+        menuItemHistory.Items.Add(subItemHistory);
+        menuItemHistory.Items.Add(new Separator());
+        foreach (var item in items)
+        {
+            var subsub = new MenuItem() {Header = item.Pattern};
+            subsub.Click += (sender, args) =>
+                            {
+                                vm.Options     = item.Options;
+                                vm.WordWrap    = item.WordWrap;
+                                edInput.Text   = item.Input;
+                                edPattern.Text = item.Pattern;
+                            };
+            
+            menuItemHistory.Items.Add(subsub);
+        }
+    }
+
+    void subItemHistoryClear_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+
+        var settings = Settings.Load();
+        settings.Items.Clear();
+        settings.Input    = edInput.Text;
+        settings.Pattern  = edPattern.Text;
+        settings.Options  = vm.Options;
+        settings.WordWrap = vm.WordWrap;
+        settings.Save();
+
+        rebuildHistory(settings.Items);
     }
 
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        if (DataContext is MainWindowViewModel vm)
-            new Settings()
-            {
-                Input    = edInput.Text,
-                Pattern  = edPattern.Text,
-                Options  = vm.Options,
-                WordWrap = vm.WordWrap
-            }.Save();
+        if (DataContext is not MainWindowViewModel vm) return;
+
+        var settings = Settings.Load();
+        settings.Input    = edInput.Text;
+        settings.Pattern  = edPattern.Text;
+        settings.Options  = vm.Options;
+        settings.WordWrap = vm.WordWrap;
+        settings.Save();
     }
 
     void edPattern_OnTextChanged(object? sender, EventArgs e)
@@ -61,7 +108,7 @@ public partial class MainWindow : Window
             if (!lct.TryUpdatePattern(edPattern.Text, vm.Options, out var ex))
             {
                 if (ex != null) vm.Error = ex.Message;
-                else vm.Data             = Array.Empty<SourceMatchData>();
+                else vm.Data             = [];
             }
             else
             {
@@ -80,7 +127,7 @@ public partial class MainWindow : Window
                                                                             grid.Children.Add(new TextBlock
                                                                                               {
                                                                                                   Text     = value.MatchIndex.ToString(),
-                                                                                                  FontSize = 11
+                                                                                                  FontSize = FONT_RESULT_SIZE
                                                                                               });
                                                                             for (var i = 0; i < value.Values.Length; i++)
                                                                             {
@@ -89,7 +136,7 @@ public partial class MainWindow : Window
                                                                                          {
                                                                                              Text                = item.Value,
                                                                                              HorizontalAlignment = HorizontalAlignment.Stretch,
-                                                                                             FontSize            = 11
+                                                                                             FontSize            = FONT_RESULT_SIZE
                                                                                          };
                                                                                 Grid.SetColumn(tb, i + 1);
                                                                                 grid.Children.Add(tb);
@@ -172,5 +219,21 @@ public partial class MainWindow : Window
     {
         edPattern_OnTextChanged(sender, e);
         edInput_OnTextChanged(sender, e);
+    }
+
+    void onMenuItem_About(object? sender, RoutedEventArgs e) =>
+        MessageBox.Show(this, "dbalashov@gmail.com", "About", MessageBox.MessageBoxButtons.Ok);
+
+    void onMenuItem_Exit(object? sender, RoutedEventArgs e)
+    {
+        switch (Application.Current?.ApplicationLifetime)
+        {
+            case IClassicDesktopStyleApplicationLifetime desktopApp:
+                desktopApp.Shutdown();
+                break;
+            case ISingleViewApplicationLifetime viewApp:
+                viewApp.MainView = null;
+                break;
+        }
     }
 }

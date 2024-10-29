@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using Avalonia.Controls.Templates;
 using Common;
@@ -9,63 +8,64 @@ namespace RegExpTracerAvalonia.ViewModels;
 
 public class MainWindowViewModel : ReactiveObject
 {
-    SourceMatchData[]?                 _data;
-    string?                            _error;
-    bool                               _errorVisible;
-    bool                               _dataVisible;
-    FuncDataTemplate<SourceMatchData>? _itemTemplate;
-    bool                               _wordWrap;
-    RegexOptions                       _options;
+    SourceMatchData[]?                 data;
+    string?                            error;
+    bool                               errorVisible;
+    bool                               dataVisible;
+    FuncDataTemplate<SourceMatchData>? itemTemplate;
+    bool                               wordWrap;
+    RegexOptions                       options;
 
     public RegexOptions Options
     {
-        get => _options;
+        get => options;
         set
         {
-            this.RaiseAndSetIfChanged(ref _options, value);
+            this.RaiseAndSetIfChanged(ref options, value);
             this.RaisePropertyChanged(nameof(PatternExplicit));
             this.RaisePropertyChanged(nameof(PatternMultiline));
             this.RaisePropertyChanged(nameof(PatternSingleLine));
             this.RaisePropertyChanged(nameof(PatternIgnoreCase));
+            this.RaisePropertyChanged(nameof(WordWrap));
         }
     }
 
     public bool PatternExplicit
     {
-        get => _options.HasFlag(RegexOptions.ExplicitCapture);
+        get => options.HasFlag(RegexOptions.ExplicitCapture);
         set => Options = value ? Options | RegexOptions.ExplicitCapture : Options & ~RegexOptions.ExplicitCapture;
     }
 
     public bool PatternIgnoreCase
     {
-        get => _options.HasFlag(RegexOptions.IgnoreCase);
+        get => options.HasFlag(RegexOptions.IgnoreCase);
         set => Options = value ? Options | RegexOptions.IgnoreCase : Options & ~RegexOptions.IgnoreCase;
     }
 
     public bool PatternMultiline
     {
-        get => _options.HasFlag(RegexOptions.Multiline);
+        get => options.HasFlag(RegexOptions.Multiline);
         set => Options = value ? Options | RegexOptions.Multiline : Options & ~RegexOptions.Multiline;
     }
 
     public bool PatternSingleLine
     {
-        get => _options.HasFlag(RegexOptions.Singleline);
+        get => options.HasFlag(RegexOptions.Singleline);
         set => Options = value ? Options | RegexOptions.Singleline : Options & ~RegexOptions.Singleline;
     }
 
     public bool WordWrap
     {
-        get => _wordWrap;
-        set => this.RaiseAndSetIfChanged(ref _wordWrap, value);
+        get => wordWrap;
+        set => this.RaiseAndSetIfChanged(ref wordWrap, value);
     }
 
     public string? Error
     {
-        get => _error;
+        get => error;
         set
         {
-            this.RaiseAndSetIfChanged(ref _error, value);
+            this.RaiseAndSetIfChanged(ref error, value);
             ErrorVisible = !string.IsNullOrEmpty(value);
             DataVisible  = string.IsNullOrEmpty(value);
         }
@@ -73,22 +73,22 @@ public class MainWindowViewModel : ReactiveObject
 
     public bool ErrorVisible
     {
-        get => _errorVisible;
-        set => this.RaiseAndSetIfChanged(ref _errorVisible, value);
+        get => errorVisible;
+        set => this.RaiseAndSetIfChanged(ref errorVisible, value);
     }
 
     public bool DataVisible
     {
-        get => _dataVisible;
-        set => this.RaiseAndSetIfChanged(ref _dataVisible, value);
+        get => dataVisible;
+        set => this.RaiseAndSetIfChanged(ref dataVisible, value);
     }
 
     public SourceMatchData[]? Data
     {
-        get => _data;
+        get => data;
         set
         {
-            this.RaiseAndSetIfChanged(ref _data, value);
+            this.RaiseAndSetIfChanged(ref data, value);
             DataVisible = value != null && value.Any();
             Error       = value != null && value.Any() ? null : "No data";
         }
@@ -96,7 +96,7 @@ public class MainWindowViewModel : ReactiveObject
 
     public FuncDataTemplate<SourceMatchData>? ItemTemplate
     {
-        get => _itemTemplate;
-        set => this.RaiseAndSetIfChanged(ref _itemTemplate, value);
+        get => itemTemplate;
+        set => this.RaiseAndSetIfChanged(ref itemTemplate, value);
     }
 }

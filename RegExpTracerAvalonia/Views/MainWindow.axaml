@@ -15,8 +15,17 @@
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
-
-    <Grid>
+    
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" IsTabStop="False">
+            <MenuItem Header="File">
+                <MenuItem Header="Exit" Click="onMenuItem_Exit"/>
+            </MenuItem>
+            <MenuItem Header="History" Name="menuItemHistory"/>
+            <MenuItem Header="About" Click="onMenuItem_About"/>
+        </Menu>
+        
+        <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
             <RowDefinition Height="*" />
@@ -42,7 +51,7 @@
                                      VerticalAlignment="Stretch"
                                      Name="edPattern"
                                      TextChanged="edPattern_OnTextChanged"
-                                     FontFamily="Jetbrains Mono"
+                                     FontFamily="JetBrains Mono"
                                      IsEnabled="True"
                                      IsVisible="True"
                                      Margin="1,1,1,0"/>
@@ -80,7 +89,7 @@
                                      TextChanged="edInput_OnTextChanged"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
-                                     FontFamily="Jetbrains Mono"
+                                     FontFamily="JetBrains Mono"
                                      Margin="1,1,1,0"/>
         </Grid>
 
@@ -109,4 +118,5 @@
 
         <TextBlock Grid.Row="3">Select rows and press Ctrl+C for copy to clipboard</TextBlock>
     </Grid>
+    </DockPanel>
 </Window>

@@ -13,7 +13,7 @@ sealed class DataLineColorTransformer : DocumentColorizingTransformer
 {
     Match[]           matches;
     Regex             rx;
-    SourceMatchData[] selected = Array.Empty<SourceMatchData>();
+    SourceMatchData[] selected = [];
 
     readonly SourceHelper sourceHelper;
 

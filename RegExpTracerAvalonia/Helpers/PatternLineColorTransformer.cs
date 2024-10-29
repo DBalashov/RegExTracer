@@ -9,7 +9,7 @@ namespace RegExpTracerAvalonia.Helpers;
 
 sealed class PatternLineColorTransformer : DocumentColorizingTransformer
 {
-    RegexParsedGroup[] parsedGroups = Array.Empty<RegexParsedGroup>();
+    RegexParsedGroup[] parsedGroups = [];
 
     public PatternLineColorTransformer(string pattern) => UpdatePattern(pattern);
 
@@ -18,7 +18,7 @@ sealed class PatternLineColorTransformer : DocumentColorizingTransformer
     RegexParsedGroup[] parseRegex(string source)
     {
         if (string.IsNullOrWhiteSpace(source))
-            return Array.Empty<RegexParsedGroup>();
+            return [];
 
         var r     = new List<RegexParsedGroup>();
         var stack = new Stack<int>();
